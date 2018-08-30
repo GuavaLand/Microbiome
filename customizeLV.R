@@ -60,24 +60,56 @@ glvmat<-function(t, y, parms){
 interationScore <- function(speciesX, speciesY){
   score = 0
   #if any of molecule secreted by Y is usable by X, score += 0.12
-  if (speciesY['MoleSecr1'] == 1 & speciesX['MoleUsa1'] == 1) {
-    score = score + 0.12
+  #if the molecule secreted by both Y and X, score -= 0.09
+  if (speciesY['MoleSecr1'] == 1) {
+    if (speciesX['MoleUsa1'] == 1) {
+      score = score + 0.12
+    }
+    if (speciesX['MoleSecr1'] == 1) {
+      score = score -0.09
+    }
   }
-  if (speciesY['MoleSecr2'] == 1 & speciesX['MoleUsa2'] == 1) {
-    score = score + 0.12
+  if (speciesY['MoleSecr2'] == 1) {
+    if (speciesX['MoleUsa2'] == 1) {
+      score = score + 0.12
+    }
+    if (speciesX['MoleSecr2'] == 1) {
+      score = score -0.09
+    }
   }
-  if (speciesY['MoleSecr3'] == 1 & speciesX['MoleUsa3'] == 1) {
-    score = score + 0.12
+  if (speciesY['MoleSecr3'] == 1) {
+    if (speciesX['MoleUsa3'] == 1) {
+      score = score + 0.12
+    }
+    if (speciesX['MoleSecr3'] == 1) {
+      score = score -0.09
+    }
   }
-  #vice-versa
-  if (speciesX['MoleSecr1'] == 1 & speciesY['MoleUsa1'] == 1) {
-    score = score + 0.12
+  #if any of molecule usable by Y is secreted by X, score += 0.12
+  #if the molecule usable by both Y and X, score -= 0.09
+  if (speciesY['MoleUsa1'] == 1) {
+    if (speciesX['MoleSecre1'] == 1) {
+      score = score + 0.12
+    }
+    if (speciesX['MoleUsa1'] == 1) {
+      score = score -0.09
+    }
   }
-  if (speciesX['MoleSecr2'] == 1 & speciesY['MoleUsa2'] == 1) {
-    score = score + 0.12
+  if (speciesY['MoleUsa2'] == 1) {
+    if (speciesX['MoleSecre2'] == 1) {
+      score = score + 0.12
+    }
+    if (speciesX['MoleUsa2'] == 1) {
+      score = score -0.09
+    }
   }
-  if (speciesX['MoleSecr3'] == 1 & speciesY['MoleUsa3'] == 1) {
-    score = score + 0.12
+  if (speciesY['MoleUsa3'] == 1) {
+    if (speciesX['MoleSecre3'] == 1) {
+      score = score + 0.12
+    }
+    if (speciesX['MoleUsa3'] == 1) {
+      score = score -0.09
+    }
   }
   #if any of antibody secreted by Y can protect X, score += 0.15
   if (speciesY['AntiSecr1'] == 1 & speciesX['AntiProt1'] == 1) {
