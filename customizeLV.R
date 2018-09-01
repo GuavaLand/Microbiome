@@ -1,5 +1,7 @@
 library(deSolve)
 
+#############################Functions#######################################
+
 #Generalized Lotka-Volterra
 glvmat<-function(t, y, parms){
   N=parms[1,1]  # species number
@@ -87,6 +89,8 @@ interationScore <- function(speciesX, speciesY){
   return(score)
 }
 
+############################################################################
+
 #number of species
 N = 10
 
@@ -128,12 +132,20 @@ tstart=0                   # time (start)
 tend=30                    # time (end) of integration
 tstep=0.1                  # time step (resolution)
 
-y<-runif(N)                # initial species abundances 
+init<-runif(N)                # initial species abundances 
 
 #Simulation for coupled system
 times<-seq(tstart, tend, by=tstep)
 
-out<-lsoda(y, times, glvmat, parms)
+#Setting initial abundance of each species to 0 and generate steady state matrix
+SSMatrix <- matrix(nrow = N, ncol = N)
+for (i in 1:N) {
+  y <- init
+  y[i] <- 0
+  out<-lsoda(y, times, glvmat, parms)
+  SSMatrix[i,] <- out[nrow(out),2:(N+1)]
+}
+
 
 ####### Figure
 
