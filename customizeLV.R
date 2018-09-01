@@ -105,7 +105,7 @@ rownames(traitMatrix) <- paste("species",c(1:N),sep = "")
 colnames(traitMatrix) <- c('MoleSecr1','MoleSecr2','MoleSecr3','MoleUsa1','MoleUsa2','MoleUsa3',
                            'AntiSecr1','AntiSecr2','AntiSecr3','AntiProt1','AntiProt2','AntiProt3')
 
-#Generate relationship matrix of 100 species
+#Generate relationship matrix of N species
 a = matrix(rep(0,N*N),nrow=N,ncol=N)
 for (row in 1:N) {
   for (col in row:N) {
@@ -121,7 +121,7 @@ for (row in 1:N) {
   }
 }
 
-#Creating random growth rate of 100 species
+#Creating random growth rate of N species
 b <- runif(N)
 
 #Parameters of Lotka-Volterra equations
