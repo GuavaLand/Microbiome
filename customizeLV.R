@@ -137,11 +137,15 @@ init<-runif(N)                # initial species abundances
 #Simulation for coupled system
 times<-seq(tstart, tend, by=tstep)
 
-#Setting initial abundance of each species to 0 and generate steady state matrix
-SSMatrix <- matrix(nrow = N, ncol = N)
-for (i in 1:N) {
-  y <- init
-  y[i] <- 0
+#Generate mask of all boolean combination of N species
+repeatBinaryNTimes <- rep(list(c(0,1)),N)
+mask <- expand.grid(repeatBinaryNTimes)
+
+#Setting presence/absence of each species based on maskand generate steady state matrix
+SSMatrix <- matrix(nrow = 2^N, ncol = N)
+for (i in 1:2^N) {
+  y <- init*mask[i,]
+  y <- as.numeric(y)
   out<-lsoda(y, times, glvmat, parms)
   SSMatrix[i,] <- out[nrow(out),2:(N+1)]
 }
