@@ -135,6 +135,17 @@ times<-seq(tstart, tend, by=tstep)
 
 out<-lsoda(y, times, glvmat, parms)
 
+####### Figure
+
+col.vec = seq(0,1,1/N)
+my.colors = hsv(col.vec)
+
+# plot time series
+plot(out[,1],out[,2],col=my.colors[1],lty=1, type="l")
+for(i in 2:N){
+  lines(out[,1],out[,(i+1)],col=my.colors[i])
+}
+legend("topright", as.character(c(1:N)), lty = rep(1,N), col = my.colors, merge = TRUE, bg = "white", text.col="black")
 
 
 
