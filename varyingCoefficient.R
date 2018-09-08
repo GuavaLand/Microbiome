@@ -1,3 +1,42 @@
-#Number of species
-N = 3
+library(deSolve)
 
+#Define GLV with varying coefficient
+glv <- function(t, x, params){
+  with(as.list(params, c(x)),{
+    dx <- alpha*x + x*(c0%*%x)+x*((ck1%*%x)%*%(ck2%*%x))
+    list(dx)
+  })
+}
+
+#Define integration method
+n.integrate <- function(time, init.x, model, params){
+  as.data.frame(ode(init.x, time, model, params))
+}
+
+
+#Define community size
+N <- 3
+
+#Define species intrinsic growth rate
+alpha <- runif(N)
+
+#Define the constant in species-species interation coefficient
+c0 <- matrix(runif(N*N, min = -1, max = 0),nrow = 3)
+#Set species self interation to -0.5
+for (i in 1:N) {
+  for (j in 1:N) {
+    if (i == j) {
+      c0[i,j] <-  -0.5
+    }
+  }
+}
+
+#Define linear coefficient in species-species interation coefficient
+ck1 <- c(1,1,1)
+ck2 <- runif(3, min = -1, max = 0.5)
+
+init.x <- c(0.6, 1, 0.4)
+
+dat <- n.integrate(0:10, init.x, glv, list(alpha=alpha, c0=c0, ck1 = ck1, ck2 = ck2))
+
+matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance')
