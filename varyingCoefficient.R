@@ -15,13 +15,13 @@ n.integrate <- function(time, init.x, model, params){
 
 
 #Define community size
-N <- 3
+N <- 10
 
 #Define species intrinsic growth rate
 alpha <- runif(N)
 
 #Define the constant in species-species interation coefficient
-c0 <- matrix(runif(N*N, min = -1, max = 0),nrow = 3)
+c0 <- matrix(runif(N*N, min = -1, max = 0),nrow = N)
 #Set species self interation to -0.5
 for (i in 1:N) {
   for (j in 1:N) {
@@ -31,9 +31,9 @@ for (i in 1:N) {
   }
 }
 
-#Define linear coefficient in species-species interation coefficient
-ck1 <- c(1,1,1)
-ck2 <- runif(3, min = -1, max = 0.5)
+#Define coefficient of linear term in species-species interation coefficient
+ck1 <- sample(c(1),N,replace = TRUE)
+ck2 <- runif(N, min = -1, max = 0.5)
 
 #Define initial abundance between 0.1 and 1, to 1 decimal place
 init.x <- floor(runif(N, min = 1, max = 10))/10
