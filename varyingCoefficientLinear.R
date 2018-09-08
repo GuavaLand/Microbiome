@@ -47,8 +47,6 @@ matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance')
 
 
 ###############################################################################
-#Uncomment to execute the following section
-
 #Generate 2^N communities where species in each community (max possible N) are present or absent
 ###############################################################################
 
