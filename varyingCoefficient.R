@@ -35,8 +35,11 @@ for (i in 1:N) {
 ck1 <- c(1,1,1)
 ck2 <- runif(3, min = -1, max = 0.5)
 
-init.x <- c(0.6, 1, 0.4)
+#Define initial abundance between 0.1 and 1, to 1 decimal place
+init.x <- floor(runif(N, min = 1, max = 10))/10
 
+#Solve the ode
 dat <- n.integrate(0:10, init.x, glv, list(alpha=alpha, c0=c0, ck1 = ck1, ck2 = ck2))
 
+#Plot
 matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance')
