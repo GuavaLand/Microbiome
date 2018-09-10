@@ -3,7 +3,7 @@ library(deSolve)
 #Define GLV with varying coefficient
 glv <- function(t, x, params){
   with(as.list(params, c(x)),{
-    dx <- alpha*x + x*(c0%*%x)+x*((ck1%*%x)%*%(ck2%*%x))
+    dx <- alpha*x + x*(c0%*%x)+x*as.vector((ck1%*%x)%*%(ck2%*%x))
     list(dx)
   })
 }
@@ -73,7 +73,7 @@ library(randomForest)
 for(i in 1:10){
   dead <- which(mask[,i] == 0)
   final <- SSMatrix[-dead,i]
-  mod <- randomForest(final ~., mask[-dead,i])
+  mod <- randomForest(final ~., mask[-dead,])
   plot(mod$y,mod$predicted,main=i)
 }
 
