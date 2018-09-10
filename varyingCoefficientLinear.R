@@ -3,7 +3,7 @@ library(deSolve)
 #Define GLV with varying coefficient
 glv <- function(t, x, params){
   with(as.list(params, c(x)),{
-    dx <- alpha*x + x*(c0%*%x)+x*(x%*%(cbind(l[[1]]%*%x,l[[2]]%*%x,l[[3]]%*%x,
+    dx <- alpha*x + x*(c0%*%x)+x*t(t(x)%*%(cbind(l[[1]]%*%x,l[[2]]%*%x,l[[3]]%*%x,
                                              l[[4]]%*%x,l[[5]]%*%x,l[[6]]%*%x,
                                              l[[7]]%*%x,l[[8]]%*%x,l[[9]]%*%x,l[[10]]%*%x)))
     list(dx)
@@ -81,7 +81,7 @@ colnames(SSMatrix) <- colnm
 for (i in 1:2^N) {
   init <- init.x*mask[i,]
   init <- as.numeric(init)
-  dat <- n.integrate(0:10, init, glv, list(alpha=alpha, c0=c0, ck1 = ck1, ck2 = ck2))
+  dat <- n.integrate(0:10, init, glv, list(alpha=alpha, c0=c0, l=l))
   SSMatrix[i,] <- dat[nrow(dat),2:(N+1)]
 }
 
