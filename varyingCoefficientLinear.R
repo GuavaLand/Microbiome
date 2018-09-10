@@ -3,7 +3,9 @@ library(deSolve)
 #Define GLV with varying coefficient
 glv <- function(t, x, params){
   with(as.list(params, c(x)),{
-    dx <- alpha*x + x*(c0%*%x)+x*as.vector((ck1%*%x)%*%(ck2%*%x))
+    dx <- alpha*x + x*(c0%*%x)+x*(x%*%(cbind(l[[1]]%*%x,l[[2]]%*%x,l[[3]]%*%x,
+                                             l[[4]]%*%x,l[[5]]%*%x,l[[6]]%*%x,
+                                             l[[7]]%*%x,l[[8]]%*%x,l[[9]]%*%x,l[[10]]%*%x)))
     list(dx)
   })
 }
@@ -32,14 +34,32 @@ for (i in 1:N) {
 }
 
 #Define coefficient of linear term in species-species interation coefficient
-ck1 <- sample(c(1),N,replace = TRUE)
-ck2 <- runif(N, min = -1, max = 0.5)
+ck <- runif(N*N, min = -1, max = 0.2)
+ck <- matrix(ck, nrow = N)
+#Modify ck where k == j
+for (i in 1:N) {
+  for (j in 1:N) {
+    if (i==j) {
+      ck[i,j] <- 0
+    }
+  }
+}
+#Modify ck where k == i
+temp <- ck
+temp[,1] <- 0
+l <- list()
+l[[1]] <- temp
+for (i in 2:N) {
+  temp1 <- ck
+  temp1[,i] <- 0
+  l[[i]] <- temp1
+}
 
 #Define initial abundance between 0.1 and 1, to 1 decimal place
 init.x <- floor(runif(N, min = 1, max = 10))/10
 
 #Solve the ode
-dat <- n.integrate(0:10, init.x, glv, list(alpha=alpha, c0=c0, ck1 = ck1, ck2 = ck2))
+dat <- n.integrate(0:10, init.x, glv, list(alpha=alpha, c0=c0, l=l))
 
 #Plot
 matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance')
@@ -69,13 +89,13 @@ for (i in 1:2^N) {
 ###############################################################################
 #Machine learning
 ###############################################################################
-library(randomForest)
-for(i in 1:10){
-  dead <- which(mask[,i] == 0)
-  final <- SSMatrix[-dead,i]
-  mod <- randomForest(final ~., mask[-dead,])
-  plot(mod$y,mod$predicted,main=i)
-}
+# library(randomForest)
+# for(i in 1:10){
+#   dead <- which(mask[,i] == 0)
+#   final <- SSMatrix[-dead,i]
+#   mod <- randomForest(final ~., mask[-dead,])
+#   plot(mod$y,mod$predicted,main=i)
+# }
 
 
 
