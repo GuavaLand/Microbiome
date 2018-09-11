@@ -1,6 +1,7 @@
 library(deSolve)
 
 #Define GLV with varying coefficient
+#
 glv <- function(t, x, params){
   with(as.list(params, c(x)),{
     dx <- alpha*x + x*(c0%*%x)+x*t(t(x)%*%(cbind(l[[1]]%*%x,l[[2]]%*%x,l[[3]]%*%x,
@@ -10,12 +11,14 @@ glv <- function(t, x, params){
   })
 }
 #glv1 as original GLV
+#c0 is beta
 glv1 <- function(t, x, params){
   with(as.list(params, c(x)),{
     dx <- alpha*x + x*(c0%*%x)
     list(dx)
   })
 }
+
 
 #Define integration method
 n.integrate <- function(time, init.x, model, params){
@@ -66,10 +69,12 @@ for (i in 2:N) {
 init.x <- floor(runif(N, min = 1, max = 10))/10
 
 #Solve the ode
-dat <- n.integrate(0:100, init.x, glv1, list(alpha=alpha, c0=c0, l=l))
-
+dat <- n.integrate(0:100, init.x, glv, list(alpha=alpha, c0=c0, l=l))
+dat1 <- n.integrate(0:100, init.x, glv1, list(alpha=alpha, c0=c0))
 #Plot
-matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance')
+
+matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance', main='Modified GLV')
+matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance', main='Original GLV')
 
 
 
