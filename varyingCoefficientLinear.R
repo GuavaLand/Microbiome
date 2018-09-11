@@ -9,6 +9,13 @@ glv <- function(t, x, params){
     list(dx)
   })
 }
+#glv1 as original GLV
+glv1 <- function(t, x, params){
+  with(as.list(params, c(x)),{
+    dx <- alpha*x + x*(c0%*%x)
+    list(dx)
+  })
+}
 
 #Define integration method
 n.integrate <- function(time, init.x, model, params){
@@ -59,7 +66,7 @@ for (i in 2:N) {
 init.x <- floor(runif(N, min = 1, max = 10))/10
 
 #Solve the ode
-dat <- n.integrate(0:10, init.x, glv, list(alpha=alpha, c0=c0, l=l))
+dat <- n.integrate(0:100, init.x, glv1, list(alpha=alpha, c0=c0, l=l))
 
 #Plot
 matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance')
