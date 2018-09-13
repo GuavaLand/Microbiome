@@ -2,6 +2,7 @@ library(deSolve)
 
 #Define GLV with varying coefficient
 #
+#Consider do.call(cbind, lapply(listName, FUN=function(x) x%*%vectorName))
 glv <- function(t, x, params){
   with(as.list(params, c(x)),{
     dx <- alpha*x + x*(c0%*%x)+x*t(t(x)%*%(cbind(l[[1]]%*%x,l[[2]]%*%x,l[[3]]%*%x,
