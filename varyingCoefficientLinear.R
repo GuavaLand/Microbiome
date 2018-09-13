@@ -1,13 +1,9 @@
 library(deSolve)
 
 #Define GLV with varying coefficient
-#
-#Consider do.call(cbind, lapply(listName, FUN=function(x) x%*%vectorName))
 glv <- function(t, x, params){
   with(as.list(params, c(x)),{
-    dx <- alpha*x + x*(c0%*%x)+x*t(t(x)%*%(cbind(l[[1]]%*%x,l[[2]]%*%x,l[[3]]%*%x,
-                                             l[[4]]%*%x,l[[5]]%*%x,l[[6]]%*%x,
-                                             l[[7]]%*%x,l[[8]]%*%x,l[[9]]%*%x,l[[10]]%*%x)))
+    dx <- alpha*x + x*(c0%*%x)+x*t(t(x)%*%(do.call(cbind, lapply(l, FUN=function(ma) ma%*%x))))
     list(dx)
   })
 }
@@ -47,24 +43,23 @@ for (i in 1:N) {
 #Define coefficient of linear term in species-species interation coefficient
 ck <- runif(N*N, min = -1, max = 0.2)
 ck <- matrix(ck, nrow = N)
-#Modify ck where k == j
+l <- list()
 for (i in 1:N) {
+  #For i-th matrix, i-th row is 0
+  temp <- ck
+  temp[i,] <- 0
+  
+  #In i-th matrix, elements are 0 if k (column) == either j (row) or i (matrix order)
   for (j in 1:N) {
-    if (i==j) {
-      ck[i,j] <- 0
+    for (k in 1:N) {
+      if (k==j | k == i) {
+        temp[j,k] <- 0
+      }
     }
   }
+  l[[i]] <- temp
 }
-#Modify ck where k == i
-temp <- ck
-temp[,1] <- 0
-l <- list()
-l[[1]] <- temp
-for (i in 2:N) {
-  temp1 <- ck
-  temp1[,i] <- 0
-  l[[i]] <- temp1
-}
+
 
 #Define initial abundance between 0.1 and 1, to 1 decimal place
 init.x <- floor(runif(N, min = 1, max = 10))/10
