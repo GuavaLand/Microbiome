@@ -24,7 +24,7 @@ n.integrate <- function(time, init.x, model, params){
 
 
 #Define community size
-N <- 10
+N <- 50
 
 #Define species intrinsic growth rate
 alpha <- runif(N)
@@ -57,6 +57,14 @@ for (i in 1:N) {
       }
     }
   }
+  
+  #Control the prevalence of thrid party effects
+  #for (element in 1:length(temp)) {
+  #  dice <- runif(1)
+  #  if (dice > 0.8) {
+  #    temp[element] <- 0
+  #  }
+  #}
   l[[i]] <- temp
 }
 
@@ -79,19 +87,19 @@ matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance
 ###############################################################################
 
 #Generate boolean mask of 2^N x N matrix
-repeatBinaryNTimes <- rep(list(c(0,1)),N)
-mask <- expand.grid(repeatBinaryNTimes)
+#repeatBinaryNTimes <- rep(list(c(0,1)),N)
+#mask <- expand.grid(repeatBinaryNTimes)
 
 #Loop through 2^N to apply each row in mask to initial abundance, solve ode, and retrieve final abundance
-SSMatrix <- as.data.frame(matrix(nrow = 2^N, ncol = N))
-colnm <- c(1:10)
-colnames(SSMatrix) <- colnm
-for (i in 1:2^N) {
-  init <- init.x*mask[i,]
-  init <- as.numeric(init)
-  dat <- n.integrate(0:10, init, glv, list(alpha=alpha, c0=c0, l=l))
-  SSMatrix[i,] <- dat[nrow(dat),2:(N+1)]
-}
+#SSMatrix <- as.data.frame(matrix(nrow = 2^N, ncol = N))
+#colnm <- c(1:N)
+#colnames(SSMatrix) <- colnm
+#for (i in 1:2^N) {
+#  init <- init.x*mask[i,]
+#  init <- as.numeric(init)
+#  dat <- n.integrate(0:10, init, glv, list(alpha=alpha, c0=c0, l=l))
+#  SSMatrix[i,] <- dat[nrow(dat),2:(N+1)]
+#}
 
 
 ###############################################################################
