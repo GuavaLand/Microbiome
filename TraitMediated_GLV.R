@@ -32,8 +32,9 @@ for (i in 1:N) {
   #Name row and col based on species ID
   rownames(temp) <- 1:N
   colnames(temp) <- 1:N
-  #Remove species i from the matrix since i will not have HOI with i-otherSpecies pair
-  temp <- temp[-i,-i]
+  #i's HOI with i-otherSpecies pair is 0
+  temp[i,] <- 0
+  temp[,i] <- 0
   #There is no HOI on intra-species interation
   diag(temp) <- 0
   
