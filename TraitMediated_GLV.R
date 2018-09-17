@@ -3,7 +3,7 @@ library(deSolve)
 #Generalize Lotka-Voltera
 glv <- function(t, x, params){
   with(as.list(params, c(x)),{
-    dx <- alpha*x + x*(c0%*%x)
+    dx <- alpha*x + x*((c0+Reduce('+', HOI))%*%x)
     list(dx)
   })
 }
@@ -41,10 +41,6 @@ for (i in 1:N) {
   HOI[[i]] <- temp
 }
 
-#Construct HOI mask mastrix to be applied to c0
-#Each column of c0 correspond to j and each row to i
-
-
 
 #Define species intrinsic growth rate
 alpha <- runif(N)
@@ -60,8 +56,11 @@ for (ro in 1:N) {
   }
 }
 
-#Adjust pairwise interaction based on HOI matrix
-
-
 #Define initial density
 init.x <- floor(runif(N, min=0.1, max=1)*10)/10
+
+#Solve the ode
+dat <- n.integrate(1:100, init.x, glv, list(alpha=alpha, c0=c0, HOI=HOI))
+
+#Plot
+matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance', main='Modified GLV')
