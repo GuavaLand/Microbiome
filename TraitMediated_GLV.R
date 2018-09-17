@@ -41,6 +41,11 @@ for (i in 1:N) {
   HOI[[i]] <- temp
 }
 
+#Construct HOI mask mastrix to be applied to c0
+#Each column of c0 correspond to j and each row to i
+
+
+
 #Define species intrinsic growth rate
 alpha <- runif(N)
 
