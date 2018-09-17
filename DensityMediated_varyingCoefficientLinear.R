@@ -89,8 +89,8 @@ matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance
 #Generate boolean mask of 2^N x N matrix
 #repeatBinaryNTimes <- rep(list(c(0,1)),N)
 #mask <- expand.grid(repeatBinaryNTimes)
-
-#Loop through 2^N to apply each row in mask to initial abundance, solve ode, and retrieve final abundance
+#
+##Loop through 2^N to apply each row in mask to initial abundance, solve ode, and retrieve final abundance
 #SSMatrix <- as.data.frame(matrix(nrow = 2^N, ncol = N))
 #colnm <- c(1:N)
 #colnames(SSMatrix) <- colnm
