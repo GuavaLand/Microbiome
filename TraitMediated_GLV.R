@@ -1,9 +1,17 @@
 library(deSolve)
 
-#Generalize Lotka-Voltera
+#Modified Lotka-Voltera (trait-mediated)
 glv <- function(t, x, params){
   with(as.list(params, c(x)),{
-    dx <- alpha*x + x*((c0+Reduce('+', HOI))%*%x)
+    dx <- alpha*x + x*((c0+Reduce('+', mapply('*',HOI,(-exp(-x)+1),SIMPLIFY = FALSE)))%*%x)
+    list(dx)
+  })
+}
+
+#Original Generalized Lotka-Voltera
+glv1 <- function(t, x, params){
+  with(as.list(params, c(x)),{
+    dx <- alpha*x + x*(c0%*%x)
     list(dx)
   })
 }
@@ -14,7 +22,7 @@ n.integrate <- function(time, init.x, model, params){
 }
 
 #Number of species
-N <- 10
+N <- 3
 
 #Create matrix of HOI (effect on growth rate)
 #N matrices in total, each specifying on species effect on other pairs
@@ -61,6 +69,8 @@ init.x <- floor(runif(N, min=0.1, max=1)*10)/10
 
 #Solve the ode
 dat <- n.integrate(1:100, init.x, glv, list(alpha=alpha, c0=c0, HOI=HOI))
+dat1 <- n.integrate(1:100, init.x, glv1, list(alpha=alpha, c0=c0))
 
 #Plot
 matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance', main='Modified GLV')
+matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance', main='Original GLV')
