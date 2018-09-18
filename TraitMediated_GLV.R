@@ -1,6 +1,16 @@
 library(deSolve)
 
 #Modified Lotka-Voltera (trait-mediated)
+#In the generalized LV, c0 describes species j's influence on i's growth rate.
+#We incorporate a new term into c0 to describe HOI of third species.
+#HOI is defined as a list of length N, with each member an N*N matrix. i-th matrix describes species i's effect on row-column pair.
+#Therefore to get the whole community's HOI effect on a particular pair, 
+#we just need to element-sum the list and find the value at corresponding row and column.
+#Before doing element-sum of HOI, we need to consider when a i-th species may be absent.
+#When this happens, HOI i-th matrix should mutiply by 0 before doing element-sum of HOI.
+#So when defining the function, we mutiply i-th matrix with (-exp(-xi)+1) (mapply function).
+#(-exp(-x)+1) is a special function that = 0 when x = 0 and approaches 1 when x increases (0.9 when x reaches 2.3).
+#The mapply ensures that HOI effect of i-th species only exists when i exists, and the effect remains unchanged as i's density increases.
 glv <- function(t, x, params){
   with(as.list(params, c(x)),{
     dx <- alpha*x + x*((c0+Reduce('+', mapply('*',HOI,(-exp(-x)+1),SIMPLIFY = FALSE)))%*%x)
