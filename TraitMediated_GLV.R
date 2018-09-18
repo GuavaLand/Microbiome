@@ -9,11 +9,11 @@ library(deSolve)
 #Before doing element-sum of HOI, we need to consider when a i-th species may be absent.
 #When this happens, HOI i-th matrix should mutiply by 0 before doing element-sum of HOI.
 #So when defining the function, we mutiply i-th matrix with (-exp(-xi)+1) (mapply function).
-#(-exp(-x)+1) is a special function that = 0 when x = 0 and approaches 1 when x increases (0.9 when x reaches 2.3).
-#The mapply ensures that HOI effect of i-th species only exists when i exists, and the effect remains unchanged as i's density increases.
+#(-exp(-5*x)+1) is a special function that = 0 when x = 0 and approaches 1 when x increases (90% of 1 when x reaches 0.46).
+#This ensures that HOI effect of i-th species only exists when i exists, and the effect remains unchanged as i's density increases.
 glv <- function(t, x, params){
   with(as.list(params, c(x)),{
-    dx <- alpha*x + x*((c0+Reduce('+', mapply('*',HOI,(-exp(-x)+1),SIMPLIFY = FALSE)))%*%x)
+    dx <- alpha*x + x*((c0+Reduce('+', mapply('*',HOI,(-exp(-5*x)+1),SIMPLIFY = FALSE)))%*%x)
     list(dx)
   })
 }
@@ -32,7 +32,7 @@ n.integrate <- function(time, init.x, model, params){
 }
 
 #Number of species
-N <- 3
+N <- 50
 
 #Create matrix of HOI (effect on growth rate)
 #N matrices in total, each specifying on species effect on other pairs
