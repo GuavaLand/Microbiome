@@ -87,17 +87,51 @@ matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance
 ###############################################################################
 
 #Generate boolean mask of 2^N x N matrix
-repeatBinaryNTimes <- rep(list(c(0,1)),N)
-mask <- expand.grid(repeatBinaryNTimes)
+#repeatBinaryNTimes <- rep(list(c(0,1)),N)
+#mask <- expand.grid(repeatBinaryNTimes)
+#When N is 50, the mask is too large
 
-#Loop through 2^N to apply each row in mask to initial abundance, solve ode, and retrieve final abundance
-SSMatrix <- as.data.frame(matrix(nrow = 2^N, ncol = N))
+#Generate random boolean mask of 100 x N
+##############
+#Implementation without checking duplicate observations
+##############
+mask <- as.data.frame(matrix(sample(c(0,1),5000, replace = TRUE), ncol = 50))
+
+##############
+#Implementation checking duplicate observations (slow!)
+##############
+##First row of mask:
+#mask <- as.data.frame(matrix(sample(c(0,1),50, replace = TRUE), ncol = 50))
+#for (row in 2:100) {
+#  tempNextRow <-  sample(c(0,1),50, replace = TRUE)
+#  #Assume this has not appeared before
+#  appeared <- FALSE
+#  #Run through 1:row-1 to check if appeared. If yes, generate a new one and do again
+#  while (TRUE) {
+#    for (subrow in 1:(row-1)) {
+#      if (all(mask[subrow,] == tempNextRow)) {
+#        appeared <- TRUE
+#        break
+#      }
+#    }
+#    if (appeared == FALSE) {
+#      #Break out of while loop
+#      break
+#    }
+#    tempNextRow <-  sample(c(0,1),50, replace = TRUE)
+#  }
+#  mask[row,] <- tempNextRow
+#}
+
+
+#Loop through 2^N(or 100) to apply each row in mask to initial abundance, solve ode, and retrieve final abundance
+SSMatrix <- as.data.frame(matrix(nrow = 100, ncol = N))
 colnm <- c(1:N)
 colnames(SSMatrix) <- colnm
-for (i in 1:2^N) {
+for (i in 1:100) {
   init <- init.x*mask[i,]
   init <- as.numeric(init)
-  dat <- n.integrate(0:10, init, glv, list(alpha=alpha, c0=c0, l=l))
+  dat <- n.integrate(0:100, init, glv, list(alpha=alpha, c0=c0, l=l))
   SSMatrix[i,] <- dat[nrow(dat),2:(N+1)]
 }
 
