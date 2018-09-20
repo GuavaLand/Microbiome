@@ -8,7 +8,7 @@ library(deSolve)
 #we just need to element-sum the list and find the value at corresponding row and column.
 #Before doing element-sum of HOI, we need to consider when a i-th species may be absent.
 #When this happens, HOI i-th matrix should mutiply by 0 before doing element-sum of HOI.
-#So when defining the function, we mutiply i-th matrix with (-exp(-xi)+1) (mapply function).
+#So when defining the function, we mutiply i-th matrix with (-exp(-5*xi)+1) (mapply function).
 #(-exp(-5*x)+1) is a special function that = 0 when x = 0 and approaches 1 when x increases (90% of 1 when x reaches 0.46).
 #This ensures that HOI effect of i-th species only exists when i exists, and the effect remains unchanged as i's density increases.
 glv <- function(t, x, params){
