@@ -87,33 +87,19 @@ matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance
 ###############################################################################
 
 #Generate boolean mask of 2^N x N matrix
-#repeatBinaryNTimes <- rep(list(c(0,1)),N)
-#mask <- expand.grid(repeatBinaryNTimes)
-#
-##Loop through 2^N to apply each row in mask to initial abundance, solve ode, and retrieve final abundance
-#SSMatrix <- as.data.frame(matrix(nrow = 2^N, ncol = N))
-#colnm <- c(1:N)
-#colnames(SSMatrix) <- colnm
-#for (i in 1:2^N) {
-#  init <- init.x*mask[i,]
-#  init <- as.numeric(init)
-#  dat <- n.integrate(0:10, init, glv, list(alpha=alpha, c0=c0, l=l))
-#  SSMatrix[i,] <- dat[nrow(dat),2:(N+1)]
-#}
+repeatBinaryNTimes <- rep(list(c(0,1)),N)
+mask <- expand.grid(repeatBinaryNTimes)
 
-
-###############################################################################
-#Machine learning
-###############################################################################
-# library(randomForest)
-# for(i in 1:10){
-#   dead <- which(mask[,i] == 0)
-#   final <- SSMatrix[-dead,i]
-#   mod <- randomForest(final ~., mask[-dead,])
-#   plot(mod$y,mod$predicted,main=i)
-# }
-
-
+#Loop through 2^N to apply each row in mask to initial abundance, solve ode, and retrieve final abundance
+SSMatrix <- as.data.frame(matrix(nrow = 2^N, ncol = N))
+colnm <- c(1:N)
+colnames(SSMatrix) <- colnm
+for (i in 1:2^N) {
+  init <- init.x*mask[i,]
+  init <- as.numeric(init)
+  dat <- n.integrate(0:10, init, glv, list(alpha=alpha, c0=c0, l=l))
+  SSMatrix[i,] <- dat[nrow(dat),2:(N+1)]
+}
 
 
 
