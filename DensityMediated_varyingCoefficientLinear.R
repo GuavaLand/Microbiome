@@ -73,8 +73,8 @@ for (i in 1:N) {
 init.x <- floor(runif(N, min = 1, max = 10))/10
 
 #Solve the ode
-dat <- n.integrate(0:100, init.x, glv, list(alpha=alpha, c0=c0, l=l))
-dat1 <- n.integrate(0:100, init.x, glv1, list(alpha=alpha, c0=c0))
+dat <- n.integrate(0:150, init.x, glv, list(alpha=alpha, c0=c0, l=l))
+dat1 <- n.integrate(0:150, init.x, glv1, list(alpha=alpha, c0=c0))
 #Plot
 
 matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance', main='Modified GLV')
@@ -131,7 +131,7 @@ colnames(SSMatrix) <- colnm
 for (i in 1:100) {
   init <- init.x*mask[i,]
   init <- as.numeric(init)
-  dat <- n.integrate(0:100, init, glv, list(alpha=alpha, c0=c0, l=l))
+  dat <- n.integrate(0:150, init, glv, list(alpha=alpha, c0=c0, l=l))
   SSMatrix[i,] <- dat[nrow(dat),2:(N+1)]
 }
 
