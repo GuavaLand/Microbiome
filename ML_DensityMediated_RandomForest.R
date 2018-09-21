@@ -5,7 +5,7 @@ initialDensityAll = t(t(mask) * init.x)
 finalDensityAll = SSMatrix
 
 #Go through each species and train model
-par(mfrow=c(2,2))
+par(mfrow=c(3,3))
 for (species in 1:N) {
   #For species i, find 0 initial condition
   dead <- mask[,species] == 0

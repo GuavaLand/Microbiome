@@ -3,7 +3,7 @@ library(deSolve)
 #Define GLV with varying coefficient
 glv <- function(t, x, params){
   with(as.list(params, c(x)),{
-    dx <- alpha*x + x*(c0%*%x)+x*t(t(x)%*%(do.call(cbind, lapply(l, FUN=function(ma) ma%*%x))))
+    dx <- alpha*x + x*as.vector(c0%*%x)+x*t(t(x)%*%(do.call(cbind, lapply(l, FUN=function(ma) ma%*%x))))
     list(dx)
   })
 }
@@ -11,7 +11,7 @@ glv <- function(t, x, params){
 #c0 is beta
 glv1 <- function(t, x, params){
   with(as.list(params, c(x)),{
-    dx <- alpha*x + x*(c0%*%x)
+    dx <- alpha*x + x*as.vector(c0%*%x)
     list(dx)
   })
 }
@@ -61,7 +61,7 @@ for (i in 1:N) {
   #Control the prevalence of thrid party effects
   for (element in 1:length(temp)) {
     dice <- runif(1)
-    if (dice > -1) {
+    if (dice > -1) { #what percent of to assign 0
       temp[element] <- 0
     }
   }
@@ -77,8 +77,8 @@ dat <- n.integrate(0:200, init.x, glv, list(alpha=alpha, c0=c0, l=l))
 dat1 <- n.integrate(0:200, init.x, glv1, list(alpha=alpha, c0=c0))
 #Plot
 
-matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance', main='Modified GLV')
-matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance', main='Original GLV')
+matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance', main=paste('Modified GLV-density', N,'species'))
+matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance', main=paste('Original GLV-density', N,'species'))
 
 
 
@@ -95,7 +95,7 @@ matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance
 ##############
 #Implementation without checking duplicate observations
 ##############
-mask <- as.data.frame(matrix(sample(c(0,1),5000, replace = TRUE), ncol = 50))
+mask <- as.data.frame(matrix(sample(c(0,1),N*300, replace = TRUE), ncol = N))
 
 ##############
 #Implementation checking duplicate observations (slow!)
@@ -124,14 +124,14 @@ mask <- as.data.frame(matrix(sample(c(0,1),5000, replace = TRUE), ncol = 50))
 #}
 
 
-#Loop through 2^N(or 100) to apply each row in mask to initial abundance, solve ode, and retrieve final abundance
-SSMatrix <- as.data.frame(matrix(nrow = 100, ncol = N))
+#Loop through 2^N(or 300) to apply each row in mask to initial abundance, solve ode, and retrieve final abundance
+SSMatrix <- as.data.frame(matrix(nrow = 300, ncol = N))
 colnm <- c(1:N)
 colnames(SSMatrix) <- colnm
-for (i in 1:100) {
+for (i in 1:300) {
   init <- init.x*mask[i,]
   init <- as.numeric(init)
-  dat <- n.integrate(0:200, init, glv, list(alpha=alpha, c0=c0, l=l))
+  dat <- n.integrate(0:100, init, glv, list(alpha=alpha, c0=c0, l=l))
   SSMatrix[i,] <- dat[nrow(dat),2:(N+1)]
 }
 

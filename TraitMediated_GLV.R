@@ -78,9 +78,9 @@ for (ro in 1:N) {
 init.x <- floor(runif(N, min=0.1, max=1)*10)/10
 
 #Solve the ode
-dat <- n.integrate(1:100, init.x, glv, list(alpha=alpha, c0=c0, HOI=HOI))
-dat1 <- n.integrate(1:100, init.x, glv1, list(alpha=alpha, c0=c0))
+dat <- n.integrate(1:200, init.x, glv, list(alpha=alpha, c0=c0, HOI=HOI))
+dat1 <- n.integrate(1:200, init.x, glv1, list(alpha=alpha, c0=c0))
 
 #Plot
-matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance', main='Modified GLV')
-matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance', main='Original GLV')
+matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance', main=paste('Modified GLV-trait',N,'species'))
+matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance', main=paste('Original GLV-trait',N, 'species'))
