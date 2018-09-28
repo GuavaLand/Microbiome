@@ -1,12 +1,12 @@
 library(deSolve)
 
 #Define community size
-N = 50
+N = 10
 
 #Define Naive model
 nm <- function(t, x, params){
   with(as.list(params, c(x)),{
-    dx <- x - x*as.vector(c0%*%x)
+    dx <- x + x*(c0%*%x)
     list(dx)
   })
 }
@@ -20,8 +20,12 @@ n.integrate <- function(time, init.x, model, params){
 init.x <- floor(runif(N)*10)/10
 
 #Define c0 as 1/N
-c0 <- matrix(rep(1/N, N^2), nrow = N)
-#Excluding the species itself
-diag(c0) <- 0
+c0 <- matrix(rep(-1/N, N^2), nrow = N)
+#Define intra-species effect
+diag(c0) <- -0.5
 
+#Solve ode
+dat <- n.integrate(1:100, init.x, nm, list(c0 = c0))
 
+#plot
+matplot(x = dat$time, y = dat[,-1], type = 'b', xlab = 'time', ylab = 'Absolute abundance', main = paste('Naive Model',N,'Species'))
