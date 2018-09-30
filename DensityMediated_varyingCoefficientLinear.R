@@ -22,64 +22,68 @@ n.integrate <- function(time, init.x, model, params){
   as.data.frame(lsoda(init.x, time, model, params))
 }
 
-
 #Define community size
 #N <- 30
 
-#Define species intrinsic growth rate
-alpha <- runif(N)
-
-#Define the constant in species-species interation coefficient
-c0 <- matrix(runif(N*N, min = -1, max = 0),nrow = N)
-#Set species self interation to -0.5
-for (i in 1:N) {
-  for (j in 1:N) {
-    if (i == j) {
-      c0[i,j] <-  -0.5
-    }
-  }
-}
-
-#Define coefficient of linear term in species-species interation coefficient
-ck <- runif(N*N, min = -1, max = 0.2)
-ck <- matrix(ck, nrow = N)
-l <- list()
-for (i in 1:N) {
-  #For i-th matrix, i-th row is 0
-  temp <- ck
-  temp[i,] <- 0
+growthFunction <- function(N){
+  #Define species intrinsic growth rate
+  alpha <- runif(N)
   
-  #In i-th matrix, elements are 0 if k (column) == either j (row) or i (matrix order)
-  for (j in 1:N) {
-    for (k in 1:N) {
-      if (k==j | k == i) {
-        temp[j,k] <- 0
+  #Define the constant in species-species interation coefficient
+  c0 <- matrix(runif(N*N, min = -1, max = 0),nrow = N)
+  #Set species self interation to -0.5
+  for (i in 1:N) {
+    for (j in 1:N) {
+      if (i == j) {
+        c0[i,j] <-  -0.5
       }
     }
   }
   
-  #Control the prevalence of thrid party effects
-  #for (element in 1:length(temp)) {
-  #  dice <- runif(1)
-  #  if (dice > -1) { #what percent of to assign 0
-  #    temp[element] <- 0
-  #  }
-  #}
-  l[[i]] <- temp
+  #Define coefficient of linear term in species-species interation coefficient
+  ck <- runif(N*N, min = -1, max = 0.2)
+  ck <- matrix(ck, nrow = N)
+  l <- list()
+  for (i in 1:N) {
+    #For i-th matrix, i-th row is 0
+    temp <- ck
+    temp[i,] <- 0
+    
+    #In i-th matrix, elements are 0 if k (column) == either j (row) or i (matrix order)
+    for (j in 1:N) {
+      for (k in 1:N) {
+        if (k==j | k == i) {
+          temp[j,k] <- 0
+        }
+      }
+    }
+    
+    #Control the prevalence of thrid party effects
+    #for (element in 1:length(temp)) {
+    #  dice <- runif(1)
+    #  if (dice > -1) { #what percent of to assign 0
+    #    temp[element] <- 0
+    #  }
+    #}
+    l[[i]] <- temp
+  }
+  
+  
+  #Define initial abundance between 0.1 and 1, to 1 decimal place
+  init.x <- floor(runif(N, min = 1, max = 10))/10
+  
+  #Solve the ode
+  dat <- n.integrate(0:500, init.x, glv, list(alpha=alpha, c0=c0, l=l))
+  dat1 <- n.integrate(0:500, init.x, glv1, list(alpha=alpha, c0=c0))
+  
+  #Plot
+  matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance', main=paste('Modified GLV-density', N,'species'))
+  matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance', main=paste('Original GLV-density', N,'species'))
+  
+  returnList <- list(dat,dat1)
+  
+  return(returnList)
 }
-
-
-#Define initial abundance between 0.1 and 1, to 1 decimal place
-init.x <- floor(runif(N, min = 1, max = 10))/10
-
-#Solve the ode
-dat <- n.integrate(0:500, init.x, glv, list(alpha=alpha, c0=c0, l=l))
-dat1 <- n.integrate(0:500, init.x, glv1, list(alpha=alpha, c0=c0))
-#Plot
-
-matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance', main=paste('Modified GLV-density', N,'species'))
-matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance', main=paste('Original GLV-density', N,'species'))
-
 
 
 ###############################################################################
