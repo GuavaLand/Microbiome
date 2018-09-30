@@ -1,3 +1,11 @@
+###############################################################
+#Simulate species growth function given number of species N
+#Find the steady state for each species and store in matrix HOI_SSN or GLV_SSN, based on model used for simulation
+#Save HOI_SSN and GLV_SSN as csv at working directory
+###############################################################
+
+
+
 source('FindSS.R')
 #source('ML_DensityMediated_RandomForest.R')
 source('DensityMediated_varyingCoefficientLinear.R')
