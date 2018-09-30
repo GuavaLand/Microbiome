@@ -42,7 +42,7 @@ hist(CommunitySteadyStateDF[CommunitySteadyStateDF$CommunitySize == 30,2], main 
 hist(CommunitySteadyStateDF[CommunitySteadyStateDF$CommunitySize == 40,2], main = 'Community Steady State Time (HOI Model) for 40 Species', xlab = 'Community SS Time', ylim = c(0,500))
 hist(CommunitySteadyStateDF[CommunitySteadyStateDF$CommunitySize == 50,2], main = 'Community Steady State Time (HOI Model) for 50 Species', xlab = 'Community SS Time', ylim = c(0,500))
 #plot boxplotboxplot(SteadyStateTime~CommunitySize ,data = CommunitySteadyStateDF)
-
+boxplot(SteadyStateTime~CommunitySize ,data = CommunitySteadyStateDF)
 
 
 ##################################################################################
