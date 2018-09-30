@@ -1,3 +1,8 @@
+######################################################################################
+#Given density data (vector) over time (1:length(vector)), find steady state time
+#If there is no steady state, return NaN
+######################################################################################
+
 FindSS <- function(vec){
   for (i in 1:(length(vec) - 10)) {
     #From start, search for 3 points each 5 unit time apart where delta < 10^-3
