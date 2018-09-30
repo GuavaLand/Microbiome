@@ -18,7 +18,7 @@ GLV_SS10 <-  matrix(nrow = numTrial, ncol = N)
 
 for (trial in 1:numTrial) {
   repeat {
-    #densityData is a list of dat (modified model) and dat1 (GLV)
+    #densityData is a list of dat (HOI model) and dat1 (GLV)
     densityData <- growthFunction(N)
     #Check if any NaN in dat
     dat <- densityData[[1]]
