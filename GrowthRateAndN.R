@@ -32,7 +32,7 @@ for (HOI in HOI_list) {
   HOI_i <- HOI_i+10
 }
 
-
+boxplot(SteadyStateTime~CommunitySize ,data = CommunitySteadyStateDF)
 
 
 
