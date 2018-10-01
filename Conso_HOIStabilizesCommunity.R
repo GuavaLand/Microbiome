@@ -122,7 +122,7 @@ numTrial = 1000
 HOI_list <- list()
 GLV_list <- list()
 
-for (n in 1:2) {
+for (n in 1:50) {
   #n is a counter. N is the number of species in community
   N <- n*5
   
@@ -184,12 +184,12 @@ for (n in 1:length(HOI_list)) {
     #If there is NA in a particular row, for wither HOI or GLV, this community combination did not reach SS within integration time. Move to next row
     if (!HOINA & !GLVNA) {
       #If no NA in both HOI and GLV (for that row, both model reached steady state)
-      CommunitySteadyStateTime[i,1] <- n * 10
-      CommunitySteadyStateTime[i,2] <- max(HOI[i,2:ncol(HOI)])
-      CommunitySteadyStateTime[i,3] <- max(GLV[i,2:ncol(GLV)])
+      CommunitySteadyStateTime[i,1] <- n * 5
+      CommunitySteadyStateTime[i,2] <- max(HOI[i,1:ncol(HOI)])
+      CommunitySteadyStateTime[i,3] <- max(GLV[i,1:ncol(GLV)])
     }
     else{
-      CommunitySteadyStateTime[i,1] <- n * 10
+      CommunitySteadyStateTime[i,1] <- n * 5
       CommunitySteadyStateTime[i,2] <- NA
       CommunitySteadyStateTime[i,3] <- NA
     }
@@ -203,11 +203,8 @@ CommunitySteadyStateDF$Difference <- CommunitySteadyStateDF$SteadyStateTimeGLV -
 
 #plot
 par(mfrow = c(3,2))
-#plot histogram for Community Steady State time difference for each of the community size 
-hist(CommunitySteadyStateDF[CommunitySteadyStateDF$CommunitySize == 10,4], main = 'How Much Longer Does GLV Reaches SS Than HOI 10 Species', xlab = 'Time Difference', ylim = c(0,500), breaks = 18)
-hist(CommunitySteadyStateDF[CommunitySteadyStateDF$CommunitySize == 20,4], main = 'How Much Longer Does GLV Reaches SS Than HOI 20 Species', xlab = 'Time Difference', ylim = c(0,500), breaks = 18)
-#hist(CommunitySteadyStateDF[CommunitySteadyStateDF$CommunitySize == 30,4], main = 'How Much Longer Does GLV Reaches SS Than HOI 30 Species', xlab = 'Time Difference', ylim = c(0,500), breaks = 18)
-#hist(CommunitySteadyStateDF[CommunitySteadyStateDF$CommunitySize == 40,4], main = 'How Much Longer Does GLV Reaches SS Than HOI 40 Species', xlab = 'Time Difference', ylim = c(0,500), breaks = 18)
-#hist(CommunitySteadyStateDF[CommunitySteadyStateDF$CommunitySize == 50,4], main = 'How Much Longer Does GLV Reaches SS Than HOI 50 Species', xlab = 'Time Difference', ylim = c(0,500), breaks = 18)
-#plot boxplotboxplot(SteadyStateTime~CommunitySize ,data = CommunitySteadyStateDF)Differences
+#plot histogram for Community Steady State time difference for each of the community size
+for (n in 1:length(HOI_list)) {
+  hist(CommunitySteadyStateDF[CommunitySteadyStateDF$CommunitySize == n*5,4], main = paste('How Much Longer Does GLV Reaches SS Than HOI',n*5,'Species'), xlab = 'Time Difference', ylim = c(0,500), breaks = 18)
+}
 boxplot(Difference~CommunitySize ,data = CommunitySteadyStateDF, main = 'How Much Longer Does GLV Reaches SS Than HOI', xlab = 'Community Size', ylab = 'Time Difference')
