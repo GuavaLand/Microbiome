@@ -1,3 +1,4 @@
+library(deSolve)
 ########################################################
 #Assuming that the naive model generates predicted data
 #HOI is the observed data
@@ -10,7 +11,7 @@
 #Define Naive model
 nm <- function(t, x, params){
   with(as.list(params, c(x)),{
-    dx <- x + x*(c0%*%x)
+    dx <- x + x*(cn%*%x)
     list(dx)
   })
 }
@@ -20,17 +21,17 @@ n.integrate <- function(time, init.x, model, params){
   as.data.frame(lsoda(init.x, time, model, params))
 }
 
-naiveModel <- function(N, init.x, c0){
+naiveModel <- function(N, init.x){
   ##Define intial density
   #init.x <- floor(runif(N)*10)/10
   
-  ##Define c0 as 1/N
-  #c0 <- matrix(rep(-1/N, N^2), nrow = N)
-  ##Define intra-species effect
-  #diag(c0) <- -0.5
+  #Define cn as 1/N
+  cn <- matrix(rep(-1/N, N^2), nrow = N)
+  #Define intra-species effect
+  diag(cn) <- -0.5
   
   #Solve ode
-  dat <- n.integrate(1:500, init.x, nm, list(c0 = c0))
+  dat <- n.integrate(1:500, init.x, nm, list(cn = cn))
   
   #plot
   matplot(x = dat$time, y = dat[,-1], type = 'b', xlab = 'time', ylab = 'Absolute abundance', main = paste('Naive Model',N,'Species'))
@@ -49,7 +50,7 @@ glv <- function(t, x, params){
   })
 }
 
-growthFunction <- function(N, init.x, c0){
+growthFunction <- function(N, init.x){
   #Define species intrinsic growth rate
   alpha <- runif(N)
   
@@ -102,8 +103,9 @@ growthFunction <- function(N, init.x, c0){
 }
 
 
-
+############################################################
 #Find species steady state density
+############################################################
 SSDensity <- function(vec){
   for (i in 1:(length(vec) - 10)) {
     #From start, search for 3 points each 5 unit time apart where delta < 10^-3
@@ -115,7 +117,7 @@ SSDensity <- function(vec){
       #Verification: make sure no change after plateau: extrapolate
       #Extrapolate by thisSlope and calculate value at end of integration time
       ExtrEndTimeValue = vec[i] + nextSlope*(length(vec) - i)
-      if ((ExtrEndTimeValue < (vec[length(vec)]) + 0.01)& (ExtrEndTimeValue > (vec[length(vec)]) - 0.01)) {
+      if ((ExtrEndTimeValue < (vec[length(vec)]) + 0.001)& (ExtrEndTimeValue > (vec[length(vec)]) - 0.001)) {
         return(vec[i])
       }
       #There is a plateau in the middle, but in the end density changes again: find next plateau and verify agin
@@ -133,29 +135,30 @@ SSDensity <- function(vec){
 #Define intial density
 init.x <- floor(runif(N)*10)/10
 
-#Define c0 as 1/N
-c0 <- matrix(rep(-1/N, N^2), nrow = N)
-#Define intra-species effect
-diag(c0) <- -0.5
-
 #Run both models for community size of 10 to 50
-for (n in 1:5) {
+for (n in 1:2) {
   #Community size
   N <- n * 10
   
-  predicted_dat <- naiveModel(N, init.x, c0)
-  observed_dat <- growthFunction(N, init.x, c0)
+  predicted_dat_SS <- matrix(nrow = N, ncol = 1)
+  colname(predicted_dat_SS) = c('predicted_dat_SS')
+  observed_dat_SS <- matrix(nrow = N, ncol = 1)
+  colname(observed_dat_SS) = c('observed_dat_SS')
+  
+  predicted_dat <- naiveModel(N, init.x)
+  observed_dat <- growthFunction(N, init.x)
   
   #Now find steady state density of each species in predicted_dat and observed_dat
   for (i in 2:ncol(predicted_dat)) {
-    vec <- predicted_dat[,i]
-    SSDensity[vec]
+    pvec <- predicted_dat[,i]
+    predicted_dat_SS[i-1,1] <- SSDensity(pvec)
   }
   
   for (j in 2:ncol(observed_dat)) {
     ovec <- observed_dat[,j]
-    SSDensity[ovec]
+    observed_dat_SS[j-1,1] <- SSDensity(ovec)
   }
   
+  #Consolidate predicted dat SS and observed dat SS into one
   
 }
