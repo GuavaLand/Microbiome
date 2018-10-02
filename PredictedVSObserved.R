@@ -127,23 +127,24 @@ SSDensity <- function(vec){
   return(NaN)
 }
 
-
-
 #######################################################
 #Common parameter for Naive model and HOI model
 #######################################################
-#Define intial density
-init.x <- floor(runif(N)*10)/10
+n_list = list()
 
 #Run both models for community size of 10 to 50
 for (n in 1:2) {
   #Community size
   N <- n * 10
   
+  #Define intial density
+  init.x <- floor(runif(N)*10)/10
+  
+  #Initialize matrix to store single species SS density
   predicted_dat_SS <- matrix(nrow = N, ncol = 1)
-  colname(predicted_dat_SS) = c('predicted_dat_SS')
+  colnames(predicted_dat_SS) <- c('predicted_dat_SS')
   observed_dat_SS <- matrix(nrow = N, ncol = 1)
-  colname(observed_dat_SS) = c('observed_dat_SS')
+  colnames(observed_dat_SS) <- c('observed_dat_SS')
   
   predicted_dat <- naiveModel(N, init.x)
   observed_dat <- growthFunction(N, init.x)
@@ -151,14 +152,28 @@ for (n in 1:2) {
   #Now find steady state density of each species in predicted_dat and observed_dat
   for (i in 2:ncol(predicted_dat)) {
     pvec <- predicted_dat[,i]
-    predicted_dat_SS[i-1,1] <- SSDensity(pvec)
+    speciesDensity <- SSDensity(pvec)
+    #if the species' SS density is too low, regard as 0
+    if (speciesDensity < 0.00001) {
+      predicted_dat_SS[i-1,1] <- 0
+    }
+    else{
+      predicted_dat_SS[i-1,1] <- speciesDensity
+    }
   }
   
   for (j in 2:ncol(observed_dat)) {
     ovec <- observed_dat[,j]
-    observed_dat_SS[j-1,1] <- SSDensity(ovec)
+    ospeciesDensity <- SSDensity(ovec)
+    
+    if (ospeciesDensity < 0.00001) {
+      observed_dat_SS[j-1,1] <- 0
+    }
+    else{
+      observed_dat_SS[j-1,1] <- ospeciesDensity
+    }
+     
   }
   
-  #Consolidate predicted dat SS and observed dat SS into one
-  
+  n_list[[n]] <- cbind(predicted_dat_SS,observed_dat_SS)
 }
