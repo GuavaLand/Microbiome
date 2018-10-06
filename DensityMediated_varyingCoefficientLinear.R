@@ -80,7 +80,7 @@ growthFunction <- function(N){
   matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance', main=paste('Modified GLV-density', N,'species'))
   matplot(x=dat1$time, y=dat1[,-1], typ='b', xlab='time', ylab='Absolute abundance', main=paste('Original GLV-density', N,'species'))
   
-  returnList <- list(dat,dat1)
+  returnList <- list(dat = dat,dat1 = dat1, alpha = alpha, c0 = c0, l = l)
   
   return(returnList)
 }
