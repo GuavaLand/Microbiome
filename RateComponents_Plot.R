@@ -24,7 +24,7 @@ plotRateComponent <- function(term1, term2, term3){
   
   #Iterate through all species
   for (n in 1:N) {
-    print(ggplot(term1,aes_string(x = 'time',y = paste('species',n,sep='')))+
+    print(ggplot(term1,aes_string(x = 'time',y = paste('species',n,sep='')))+labs(y = paste('species',n,'growth rate',sep=' '))+
       geom_area(aes(fill = term),alpha=0.5) + geom_area(data=term2,aes(fill = term),alpha=0.5)+
       geom_area(data = term3,aes(fill = term),alpha = 0.5)+
       geom_line(data = rate)) #superimpose with overall growth rate 
