@@ -1,8 +1,8 @@
 library(plyr)
-
+library(randomForest)
 source('ML_GetCommunityParam.R')
 source('ML_CommunitySimulation.R')
-source('ML_FindSS.R')
+source('ML_FindSSDensity.R')
 
 
 #Number of of species
@@ -22,7 +22,7 @@ l <- simulationParam$l
 init <- simulationParam$init
 
 #rows of mask: # of data points
-M = 2
+M = 100
 mask <- matrix(sample(c(0,1),M*N,replace=TRUE), nrow = M, ncol = N)
 
 #count unique number of rows
@@ -35,7 +35,31 @@ init_mask = t(t(mask) * init)
 dat_list <- apply(init_mask, 1, function(x){growthFunction(N,alpha,c0,l,x)})
 
 #3. Find steady state
-#SS <- matrix()
-#SS <- apply(dat[,2:(N+1)],MARGIN = 2,findSS)
+matrixToSS <- function(densityMatrix){
+  s <- apply(densityMatrix[,2:(N+1)], MARGIN = 2, findSSDensity)
+  return(s)
+}
+
+#output list: each member is SS density of every species
+SS <- lapply(dat_list, matrixToSS)
+#rbind all members in the list to form matrix
+SS <- do.call(rbind, SS)
+#If SS density is too small, set to 0
+SS[which(SS < 0.001)] = 0
+
+
+############################################
+# input: init_mask
+# output: SS
+#
+#each row is an entry of data (determined by M)
+#each col is a species
+#data are density
+############################################
+
+train_x = as.data.frame(init_mask)
+train_y = as.data.frame(SS)
+
+mod <- apply(train_y, MARGIN = 2, function(x){randomForest(x ~., train_x)}) 
 
 

@@ -1,9 +1,7 @@
-######################################################################################
-#Given density data (vector) over time (1:length(vector)), find steady state time
-#If there is no steady state, return NaN
-######################################################################################
-
-findSS <- function(vec){
+############################################################
+#Find species steady state density
+############################################################
+findSSDensity <- function(vec){
   for (i in 1:(length(vec) - 10)) {
     #From start, search for 3 points each 5 unit time apart where delta < 10^-3
     thisSlope <- abs(vec[i+1] - vec[i])
@@ -14,11 +12,10 @@ findSS <- function(vec){
       #Verification: make sure no change after plateau: extrapolate
       #Extrapolate by thisSlope and calculate value at end of integration time
       ExtrEndTimeValue = vec[i] + nextSlope*(length(vec) - i)
-      if ((ExtrEndTimeValue < (vec[length(vec)]) + 0.01)& (ExtrEndTimeValue > (vec[length(vec)]) - 0.01)) {
-        return(i)
+      if ((ExtrEndTimeValue < (vec[length(vec)]) + 0.001)& (ExtrEndTimeValue > (vec[length(vec)]) - 0.001)) {
+        return(vec[i])
       }
       #There is a plateau in the middle, but in the end density changes again: find next plateau and verify agin
-      
     }
   }
   #Til the end no steady state found
