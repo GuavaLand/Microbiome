@@ -3,7 +3,7 @@
 #If there is no steady state, return NaN
 ######################################################################################
 
-FindSS <- function(vec){
+findSS <- function(vec){
   for (i in 1:(length(vec) - 10)) {
     #From start, search for 3 points each 5 unit time apart where delta < 10^-3
     thisSlope <- abs(vec[i+1] - vec[i])
