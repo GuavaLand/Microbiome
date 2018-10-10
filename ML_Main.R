@@ -3,6 +3,8 @@ library(randomForest)
 source('ML_GetCommunityParam.R')
 source('ML_CommunitySimulation.R')
 source('ML_FindSSDensity.R')
+source('ML_PredictionAccuracy.R')
+source('ML_GetBinaryInitialState.R')
 
 
 #Number of of species
@@ -21,15 +23,13 @@ c0 <- simulationParam$c0
 l <- simulationParam$l
 init <- simulationParam$init
 
-#rows of mask: # of data points
-M = 1000
-mask <- matrix(sample(c(0,1),M*N,replace=TRUE), nrow = M, ncol = N)
+#mask as presence/absence of each species
+mask <- getBinaryInitialState(10, 0.8)
+mask1 = mask$mask1
+mask2 = mask$mask2
 
-#count unique number of rows
-#cus the way we generate mask may create repeated rows
-nrow(count(mask))
 
-init_mask = t(t(mask) * init)
+init_mask = t(t(mask1) * init)
 
 #2. Do simulation and save result to dat_list
 dat_list <- apply(init_mask, 1, function(x){growthFunction(N,alpha,c0,l,x)})
@@ -58,6 +58,8 @@ SS[which(SS < 0.001)] = 0
 #data are density
 ############################################
 
+########    consider modulate prediction part  ##########
+
 train_x = as.data.frame(init_mask)
 train_y = as.data.frame(SS)
 
@@ -69,7 +71,7 @@ if (any(is.na(train_y))) {
   train_y = train_y[-NA_containing_rows,]
 }
 
-#Train ONE rf train_x to each column in train_y
+#Train ONE rf of each column in train_y ~ train_x
 rf_species = list()
 for (i in 1:N) {
   #for species i, if train_x starts with 0, train_y will be 0 
