@@ -30,6 +30,7 @@ mask2 = mask$mask2
 
 
 init_mask = t(t(mask1) * init)
+init_mask_2 = t(t(mask2) * init)
 
 #2. Do simulation and save result to dat_list
 dat_list <- apply(init_mask, 1, function(x){growthFunction(N,alpha,c0,l,x)})
@@ -84,4 +85,38 @@ for (i in 1:N) {
   rf_species[[i]] = randomForest(y ~ ., data = data)
 }
 
+###########################################
+#1. take test_sample_size samples from mask 2
+#2. simulate to get 'real' final state
+#3. use rf_species to predict final state
+#4. calculate prediction accuracy
+#5. save as a csv to wd
 
+test_sample_size = 50
+
+#1. take test sample
+actual_sample  = init_mask_2[50:(49 +test_sample_size),]
+
+#2. get real final state
+actual_dat_list = apply(actual_sample, 1, function(x){growthFunction(N,alpha,c0,l,x)})
+
+#output list: each member is SS density of every species
+actual_SS <- lapply(actual_dat_list, matrixToSS)
+#rbind all members in the list to form matrix
+actual_SS <- do.call(rbind, actual_SS)
+#If SS density is too small, set to 0
+actual_SS[which(actual_SS < 0.001)] = 0
+
+#3. use rf_species to predict final state
+predicted_SS = matrix(nrow = test_sample_size, ncol = N)
+
+for (row in 1:test_sample_size) {
+  data_point = t(as.data.frame(actual_sample[row,]))
+  for (modID in 1:length(rf_species)) {
+    predicted_SS[row,modID] = predict(rf_species[[modID]],data_point)
+  }
+}
+
+#4. calculate accuracy
+actual_SS[is.na(actual_SS)] <- 0
+difference_score = sum(predicted_SS - actual_SS)^2
