@@ -24,7 +24,7 @@ l <- simulationParam$l
 init <- simulationParam$init
 
 #mask as presence/absence of each species
-mask <- getBinaryInitialState(10, 0.8)
+mask <- getBinaryInitialState(N, 0.8)
 mask1 = mask$mask1
 mask2 = mask$mask2
 
@@ -41,7 +41,7 @@ matrixToSS <- function(densityMatrix){
 }
 
 #output list: each member is SS density of every species
-SS <- lapply(dat_list, matrixToSS)
+SS <- lapply(dat_list[c(1:325,327:819)], matrixToSS)
 #rbind all members in the list to form matrix
 SS <- do.call(rbind, SS)
 #If SS density is too small, set to 0
@@ -60,7 +60,7 @@ SS[which(SS < 0.001)] = 0
 
 ########    consider modulate prediction part  ##########
 
-train_x = as.data.frame(init_mask)
+train_x = as.data.frame(init_mask[c(1:325,327:819),])
 train_y = as.data.frame(SS)
 
 if (any(is.na(train_y))) {
