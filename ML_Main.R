@@ -24,9 +24,9 @@ l <- simulationParam$l
 init <- simulationParam$init
 
 #mask as presence/absence of each species
-mask <- getBinaryInitialState(N, 0.8)
-mask1 = mask$mask1
-mask2 = mask$mask2
+mask <- getBinaryInitialState(N, 800)
+mask1 = mask$mask1 #for training
+mask2 = mask$mask2 #for testing
 
 
 init_mask = t(t(mask1) * init)
@@ -42,7 +42,7 @@ matrixToSS <- function(densityMatrix){
 }
 
 #output list: each member is SS density of every species
-SS <- lapply(dat_list[c(1:325,327:819)], matrixToSS)
+SS <- lapply(dat_list, matrixToSS)
 #rbind all members in the list to form matrix
 SS <- do.call(rbind, SS)
 #If SS density is too small, set to 0
@@ -61,8 +61,10 @@ SS[which(SS < 0.001)] = 0
 
 ########    consider modulate prediction part  ##########
 
-train_x = as.data.frame(init_mask[c(1:325,327:819),])
+train_x = as.data.frame(init_mask)
 train_y = as.data.frame(SS)
+
+#Of the input and output, those do not reach SS (contains NA in output) should be removed
 
 if (any(is.na(train_y))) {
   #Row index where the row contains NA
@@ -77,9 +79,9 @@ rf_species = list()
 for (i in 1:N) {
   #for species i, if train_x starts with 0, train_y will be 0 
   #exclude 0
-  null_begining = which(train_x[,i] == 0)
-  train_x_filtered = train_x[-null_begining,]
-  train_y_filtered = train_y[-null_begining,]
+  void_init = which(train_x[,i] == 0)
+  train_x_filtered = train_x[-void_init,]
+  train_y_filtered = train_y[-void_init,]
   
   data = cbind(train_x_filtered,y = train_y_filtered[,i])
   rf_species[[i]] = randomForest(y ~ ., data = data)
@@ -88,6 +90,7 @@ for (i in 1:N) {
 ###########################################
 #1. take test_sample_size samples from mask 2
 #2. simulate to get 'real' final state
+#2.1 find and remove communities that cannot reach SS before use sample for prediction
 #3. use rf_species to predict final state
 #4. calculate prediction accuracy
 #5. save as a csv to wd
@@ -106,6 +109,17 @@ actual_SS <- lapply(actual_dat_list, matrixToSS)
 actual_SS <- do.call(rbind, actual_SS)
 #If SS density is too small, set to 0
 actual_SS[which(actual_SS < 0.001)] = 0
+
+
+#2.1 If we see NA in actual_SS, remove the row and remove corresponding row in actual_sample (initial state)
+##Because of the assumption that the model is only used to predict community that will reach SS
+if (any(is.na(actual_SS))) {
+  #Row index where the row contains NA
+  NA_containing_rows = unique(which(is.na(actual_SS),arr.ind = TRUE)[,1])
+  #Remove NA containing rows
+  actual_sample = actual_sample[-NA_containing_rows,]
+  actual = actual_SS[-NA_containing_rows,]
+}
 
 #3. use rf_species to predict final state
 predicted_SS = matrix(nrow = test_sample_size, ncol = N)

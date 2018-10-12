@@ -1,10 +1,10 @@
 ################################################
 #Input: number of species;
-####how many percent of binary data to be in mask1 (for training)
+####how many binary data to be in mask1 (for training)
 #Output: mask1 (*initial density for training) and mask2 (*init density for testing)
 ###############################################
 
-getBinaryInitialState <- function(N,percent){
+getBinaryInitialState <- function(N,sampleSize){
   ###########   Approach 1 for generating data points  #######
   #Generate boolean mask of 2^N x N matrix
   repeatBinaryNTimes <- rep(list(c(0,1)),N)
@@ -12,10 +12,8 @@ getBinaryInitialState <- function(N,percent){
   #Randomize rows
   mask = mask[sample(nrow(mask)),]
   
-  xPercentRow = floor(nrow(mask)*percent)
-  
-  mask1 = mask[1:xPercentRow,]
-  mask2 = mask[(xPercentRow+1):nrow(mask),]
+  mask1 = mask[1:sampleSize,]
+  mask2 = mask[(sampleSize+1):nrow(mask),]
   ###########################################################
   
   

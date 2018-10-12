@@ -16,7 +16,7 @@ n.integrate <- function(time, init, model, params){
 growthFunction <- function(N, alpha, c0, l, init){
   
   #Solve the ode
-  dat <- n.integrate(0:200, init, glv, list(alpha=alpha, c0=c0, l=l))
+  dat <- n.integrate(0:300, init, glv, list(alpha=alpha, c0=c0, l=l))
   
   #Plot
   matplot(x=dat$time, y=dat[,-1], typ='b', xlab='time', ylab='Absolute abundance', main=paste('Modified GLV-density', N,'species'))
