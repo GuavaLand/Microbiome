@@ -77,7 +77,7 @@ if (any(is.na(train_y))) {
 #Train ONE rf of each column in train_y ~ train_x, store models in rf_species
 rf_species = list()
 #Track how many samples used to train a model
-train_sample_size = matrix(nrow = N, ncol = 1)
+train_sample_size = as.data.frame(matrix(nrow = N, ncol = 1))
 for (i in 1:N) {
   #for species i, if train_x starts with 0, train_y will be 0 
   #exclude 0
@@ -144,4 +144,8 @@ for (row in 1:nrow(actual_sample)) {
 }
 
 #4. calculate accuracy
-difference_score = sum(predicted_SS - actual_SS)^2/nrow(actual_SS)
+difference_score = colSums((predicted_SS - actual_SS)^2)/nrow(actual_SS)
+train_sample_size_difference = cbind(train_sample_size,difference_score)
+write.table(train_sample_size_difference, paste(getwd(),'/score',N,'.csv', sep = ''), sep="\t")
+
+#kk = read.csv('C:\\Source\\Microbiome\\score10.csv',sep = '\t')
