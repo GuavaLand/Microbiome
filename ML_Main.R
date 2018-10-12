@@ -74,14 +74,17 @@ if (any(is.na(train_y))) {
   train_y = train_y[-NA_containing_rows,]
 }
 
-#Train ONE rf of each column in train_y ~ train_x
+#Train ONE rf of each column in train_y ~ train_x, store models in rf_species
 rf_species = list()
+#Track how many samples used to train a model
+train_sample_size = matrix(nrow = N, ncol = 1)
 for (i in 1:N) {
   #for species i, if train_x starts with 0, train_y will be 0 
   #exclude 0
   void_init = which(train_x[,i] == 0)
   train_x_filtered = train_x[-void_init,]
   train_y_filtered = train_y[-void_init,]
+  train_sample_size[i,1] = nrow(train_x_filtered)
   
   data = cbind(train_x_filtered,y = train_y_filtered[,i])
   rf_species[[i]] = randomForest(y ~ ., data = data)
@@ -90,8 +93,10 @@ for (i in 1:N) {
 ###########################################
 #1. take test_sample_size samples from mask 2
 #2. simulate to get 'real' final state
-#2.1 find and remove communities that cannot reach SS before use sample for prediction
+##2.1 find and remove communities that cannot reach SS before use sample for prediction
 #3. use rf_species to predict final state
+##3.1 before using rf_species, if a species start with 0, the final state is 0.
+##that is, only use rf_species when a species has some init state. This is also how we train the model.
 #4. calculate prediction accuracy
 #5. save as a csv to wd
 
@@ -118,19 +123,25 @@ if (any(is.na(actual_SS))) {
   NA_containing_rows = unique(which(is.na(actual_SS),arr.ind = TRUE)[,1])
   #Remove NA containing rows
   actual_sample = actual_sample[-NA_containing_rows,]
-  actual = actual_SS[-NA_containing_rows,]
+  actual_SS = actual_SS[-NA_containing_rows,]
 }
 
-#3. use rf_species to predict final state
-predicted_SS = matrix(nrow = test_sample_size, ncol = N)
 
-for (row in 1:test_sample_size) {
+#3. use rf_species to predict final state
+predicted_SS = matrix(nrow = nrow(actual_sample), ncol = N)
+
+for (row in 1:nrow(actual_sample)) {
   data_point = t(as.data.frame(actual_sample[row,]))
   for (modID in 1:length(rf_species)) {
-    predicted_SS[row,modID] = predict(rf_species[[modID]],data_point)
+    #3.1 if a species init density is 0, predict its final density to be 0
+    if (actual_sample[row,modID] == 0) {
+      predicted_SS[row,modID] = 0
+    }
+    else{
+      predicted_SS[row,modID] = predict(rf_species[[modID]],data_point)
+    }
   }
 }
 
 #4. calculate accuracy
-actual_SS[is.na(actual_SS)] <- 0
-difference_score = sum(predicted_SS - actual_SS)^2
+difference_score = sum(predicted_SS - actual_SS)^2/nrow(actual_SS)
