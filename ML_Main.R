@@ -24,13 +24,13 @@ l <- simulationParam$l
 init <- simulationParam$init
 
 #mask as presence/absence of each species
-mask <- getBinaryInitialState(N, 800)
-mask1 = mask$mask1 #for training
-mask2 = mask$mask2 #for testing
+mask <- getBinaryInitialState(N, 2^N)
+#mask1 = mask$mask1 #for training
+#mask2 = mask$mask2 #for testing
 
 
-init_mask = t(t(mask1) * init)
-init_mask_2 = t(t(mask2) * init)
+init_mask = t(t(mask) * init)
+#init_mask_2 = t(t(mask2) * init)
 
 #2. Do simulation and save result to dat_list
 dat_list <- apply(init_mask, 1, function(x){growthFunction(N,alpha,c0,l,x)})
@@ -61,30 +61,35 @@ SS[which(SS < 0.001)] = 0
 
 ########    consider modulate prediction part  ##########
 
-train_x = as.data.frame(init_mask)
-train_y = as.data.frame(SS)
+init_mask_df = as.data.frame(init_mask)
+SS_df = as.data.frame(SS)
 
 #Of the input and output, those do not reach SS (contains NA in output) should be removed
 
-if (any(is.na(train_y))) {
+if (any(is.na(SS_df))) {
   #Row index where the row contains NA
-  NA_containing_rows = unique(which(is.na(train_y),arr.ind = TRUE)[,1])
+  NA_containing_rows = unique(which(is.na(SS_df),arr.ind = TRUE)[,1])
   #Remove NA containing rows
-  train_x = train_x[-NA_containing_rows,]
-  train_y = train_y[-NA_containing_rows,]
+  init_mask_df = init_mask_df[-NA_containing_rows,]
+  SS_df = SS_df[-NA_containing_rows,]
 }
+
+#Decide how many sample to train model
+train_size = 500
+train_x = init_mask_df[1:train_size,]
+train_y = SS_df[1:train_size,]
 
 #Train ONE rf of each column in train_y ~ train_x, store models in rf_species
 rf_species = list()
 #Track how many samples used to train a model
-train_sample_size = as.data.frame(matrix(nrow = N, ncol = 1))
+train_size_deduct_0 = as.data.frame(matrix(nrow = N, ncol = 1))
 for (i in 1:N) {
   #for species i, if train_x starts with 0, train_y will be 0 
   #exclude 0
   void_init = which(train_x[,i] == 0)
   train_x_filtered = train_x[-void_init,]
   train_y_filtered = train_y[-void_init,]
-  train_sample_size[i,1] = nrow(train_x_filtered)
+  train_size_deduct_0[i,1] = nrow(train_x_filtered)
   
   data = cbind(train_x_filtered,y = train_y_filtered[,i])
   rf_species[[i]] = randomForest(y ~ ., data = data)
@@ -103,7 +108,7 @@ for (i in 1:N) {
 test_sample_size = 50
 
 #1. take test sample
-actual_sample  = init_mask_2[50:(49 +test_sample_size),]
+actual_sample  = init_mask_df[(train_size+1):(train_size + test_sample_size),]
 
 #2. get real final state
 actual_dat_list = apply(actual_sample, 1, function(x){growthFunction(N,alpha,c0,l,x)})
@@ -131,7 +136,7 @@ if (any(is.na(actual_SS))) {
 predicted_SS = matrix(nrow = nrow(actual_sample), ncol = N)
 
 for (row in 1:nrow(actual_sample)) {
-  data_point = t(as.data.frame(actual_sample[row,]))
+  data_point = as.data.frame(actual_sample[row,])
   for (modID in 1:length(rf_species)) {
     #3.1 if a species init density is 0, predict its final density to be 0
     if (actual_sample[row,modID] == 0) {
@@ -145,7 +150,7 @@ for (row in 1:nrow(actual_sample)) {
 
 #4. calculate accuracy
 difference_score = colSums((predicted_SS - actual_SS)^2)/nrow(actual_SS)
-train_sample_size_difference = cbind(train_sample_size,difference_score)
-write.table(train_sample_size_difference, paste(getwd(),'/score',N,'.csv', sep = ''), sep="\t")
+train_sample_size_difference = cbind(train_size_deduct_0,difference_score)
+write.table(train_sample_size_difference, paste(getwd(),'/score',N,'_',train_size,'.csv', sep = ''), sep="\t")
 
 #kk = read.csv('C:\\Source\\Microbiome\\score10.csv',sep = '\t')

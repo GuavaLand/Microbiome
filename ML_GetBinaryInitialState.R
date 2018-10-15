@@ -12,8 +12,8 @@ getBinaryInitialState <- function(N,sampleSize){
   #Randomize rows
   mask = mask[sample(nrow(mask)),]
   
-  mask1 = mask[1:sampleSize,]
-  mask2 = mask[(sampleSize+1):nrow(mask),]
+  #mask1 = mask[1:sampleSize,]
+  #mask2 = mask[(sampleSize+1):nrow(mask),]
   ###########################################################
   
   
@@ -26,7 +26,7 @@ getBinaryInitialState <- function(N,sampleSize){
   ##cus the way we generate mask may create repeated rows
   #nrow(count(mask))
   ###########################################################
-  re = list(mask1 = mask1, mask2 = mask2)
-  return(re)
+  #re = list(mask1 = mask1, mask2 = mask2)
+  return(mask)
 }
 
