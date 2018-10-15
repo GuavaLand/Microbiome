@@ -107,24 +107,27 @@ model <- function(train_size){ #make model training reusable with a single set o
 
 
 #Create matrix to store training sample size and the result difference score
-differenceScoreVsSampleSize = matrix(nrow = 10,ncol = 2)
+differenceScoreVsSampleSize = matrix(nrow = 18, ncol = 2)
 colnames(differenceScoreVsSampleSize) = c('difference_score','sample_size')
 
 par(mfrow = c(3,3))
-for (counter in 1:9) {
-  sample_size = counter *100
+
+row_counter = 0
+for (counter in c(c(1:9),seq(10,90,10))) {
+  sample_size = counter *10
   returned = model(sample_size)
   difference_score = returned$difference_score
   actual_sample = returned$actual_sample
   predicted_SS = returned$predicted_SS
   
-  differenceScoreVsSampleSize[counter,1] = difference_score
-  differenceScoreVsSampleSize[counter,2] = sample_size
+  row_counter = row_counter + 1
+  differenceScoreVsSampleSize[row_counter,1] = difference_score
+  differenceScoreVsSampleSize[row_counter,2] = sample_size
   
   plot(actual_sample$CommunityDensity,predicted_SS, main = paste(sample_size,'Samples Training:',round(difference_score,4)),
        xlab = 'Actual Community Density',ylab = 'Predicted Community Density')
 }
 
-plot(differenceScoreVsSampleSize[,2],differenceScoreVsSampleSize[,1], main = 'Difference between Predicted and Actual Community Density over Sample Size',
-     xlab = 'Training Sample Size', ylab = 'Difference between Predicted and Actual')
+plot(differenceScoreVsSampleSize[,2],differenceScoreVsSampleSize[,1], main = 'Difference btw Predicted and Actual \nCommunity Density over Sample Size',
+     xlab = 'Training Sample Size', ylab = 'Difference btw Predicted and Actual')
 
