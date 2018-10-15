@@ -69,36 +69,62 @@ colnames(CommunityDensity) = c('CommunityDensity')
 all_data = init_mask_df
 all_data$CommunityDensity = CommunityDensity
 
-#Decide how many sample to train model
-train_size = 500
-train_data = all_data[1:train_size,]
-
-rf = randomForest(CommunityDensity ~ ., data = train_data)
-
-###########################################
-#1. take test_sample_size samples from all data
-#2. use rf to predict final state
-#3. calculate prediction accuracy
-#4. save as a csv to cwd
-
-test_sample_size = 50
-
-#1. take test sample
-actual_sample  = all_data[(train_size+1):(train_size + test_sample_size),]
-
-#2. use rf_species to predict final state
-predicted_SS = matrix(nrow = nrow(actual_sample), ncol = 1)
-colnames(predicted_SS) = c('Predicted_Community_Density')
-
-for (row in 1:nrow(actual_sample)) {
-  data_point = as.data.frame(actual_sample[row,1:N])
-  predicted_SS[row,1] = predict(rf,data_point)
+model <- function(train_size){ #make model training reusable with a single set of simulation (all_data) 
+  #Decide how many sample to train model
+  train_size = train_size
+  train_data = all_data[1:train_size,]
+  
+  rf = randomForest(CommunityDensity ~ ., data = train_data)
+  
+  ###########################################
+  #1. take test_sample_size samples from all data
+  #2. use rf to predict final state
+  #3. calculate prediction accuracy
+  #4. save as a csv to cwd
+  
+  test_sample_size = 50
+  
+  #1. take test sample
+  actual_sample  = all_data[(train_size+1):(train_size + test_sample_size),]
+  
+  #2. use rf_species to predict final state
+  predicted_SS = matrix(nrow = nrow(actual_sample), ncol = 1)
+  colnames(predicted_SS) = c('Predicted_Community_Density')
+  
+  for (row in 1:nrow(actual_sample)) {
+    data_point = as.data.frame(actual_sample[row,1:N])
+    predicted_SS[row,1] = predict(rf,data_point)
+  }
+  
+  #3. calculate accuracy
+  difference_score = colSums((predicted_SS - actual_sample$CommunityDensity)^2)/nrow(actual_sample)
+  
+  re = list(difference_score=difference_score,actual_sample=actual_sample,
+            predicted_SS=predicted_SS)
+  
+  return(re)
 }
 
-#3. calculate accuracy
-difference_score = colSums((predicted_SS - actual_sample$CommunityDensity)^2)/nrow(actual_sample)
-par(mfrow = c(2,2))
-plot(actual_sample$CommunityDensity,predicted_SS, main = paste('Trained w ',train_size,' Samples: ',round(difference_score,4)),
-     xlab = 'Actual Community Density',ylab = 'Predicted Community Density')
 
-#kk = read.csv('C:\\Source\\Microbiome\\score10.csv',sep = '\t')
+#Create matrix to store training sample size and the result difference score
+differenceScoreVsSampleSize = matrix(nrow = 10,ncol = 2)
+colnames(differenceScoreVsSampleSize) = c('difference_score','sample_size')
+
+par(mfrow = c(3,3))
+for (counter in 1:9) {
+  sample_size = counter *100
+  returned = model(sample_size)
+  difference_score = returned$difference_score
+  actual_sample = returned$actual_sample
+  predicted_SS = returned$predicted_SS
+  
+  differenceScoreVsSampleSize[counter,1] = difference_score
+  differenceScoreVsSampleSize[counter,2] = sample_size
+  
+  plot(actual_sample$CommunityDensity,predicted_SS, main = paste(sample_size,'Samples Training:',round(difference_score,4)),
+       xlab = 'Actual Community Density',ylab = 'Predicted Community Density')
+}
+
+plot(differenceScoreVsSampleSize[,2],differenceScoreVsSampleSize[,1], main = 'Difference between Predicted and Actual Community Density over Sample Size',
+     xlab = 'Training Sample Size', ylab = 'Difference between Predicted and Actual')
+
