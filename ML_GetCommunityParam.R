@@ -31,10 +31,10 @@ getCommunityParam <- function(N){
       }
     }
     
-    #Control the prevalence of thrid party effects
+    ##Control the prevalence of thrid party effects
     #for (element in 1:length(temp)) {
     #  dice <- runif(1)
-    #  if (dice > -1) { #what percent of to assign 0
+    #  if (dice > 0.1) { #what percent of to assign 0
     #    temp[element] <- 0
     #  }
     #}
