@@ -1,5 +1,4 @@
 library(plyr)
-library(randomForest)
 source('ML_GetCommunityParam.R')
 source('ML_CommunitySimulation.R')
 source('ML_FindSSDensity.R')
@@ -74,11 +73,11 @@ model <- function(train_size){ #make model training reusable with a single set o
   train_size = train_size
   train_data = all_data[1:train_size,]
   
-  rf = randomForest(CommunityDensity ~ ., data = train_data)
+  lr = lm(CommunityDensity ~ ., data = train_data)
   
   ###########################################
   #1. take test_sample_size samples from all data
-  #2. use rf to predict final state
+  #2. use lr to predict final state
   #3. calculate prediction accuracy
   #4. save as a csv to cwd
   
@@ -93,7 +92,7 @@ model <- function(train_size){ #make model training reusable with a single set o
   
   for (row in 1:nrow(actual_sample)) {
     data_point = as.data.frame(actual_sample[row,1:N])
-    predicted_SS[row,1] = predict(rf,data_point)
+    predicted_SS[row,1] = predict(lr,data_point)
   }
   
   #3. calculate accuracy
