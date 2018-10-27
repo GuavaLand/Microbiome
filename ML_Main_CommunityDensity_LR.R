@@ -130,4 +130,4 @@ for (counter in c(c(1:9),seq(10,90,10))) {
 plot(differenceScoreVsSampleSize[,2],differenceScoreVsSampleSize[,1], main = 'Difference btw Predicted and Actual \nCommunity Density over Sample Size',
      xlab = 'Training Sample Size', ylab = 'Difference btw Predicted and Actual')
 
-#write.table(differenceScoreVsSampleSize, paste(getwd(),'/score10.csv', sep = ''), sep="\t")
+write.table(differenceScoreVsSampleSize, paste(getwd(),'/lr5.csv', sep = ''), sep="\t")

@@ -42,7 +42,7 @@ getCommunityParam <- function(N){
   }
   
   #Define initial abundance between 0.1 and 1, to 1 decimal place
-  init <- floor(runif(N, min = 1, max = 10))/10
+  init <- runif(N, min = 1, max = 10)/10
   
   re = list(alpha = alpha, c0 = c0, l = l, init = init)
   return(re)
