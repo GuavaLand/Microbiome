@@ -1,6 +1,5 @@
 library(plyr)
 library(randomForest)
-library(ggplot2)
 source('ML_GetCommunityParam.R')
 source('ML_CommunitySimulation.R')
 source('ML_FindSSDensity.R')
@@ -14,8 +13,8 @@ N = 10
 ##############################
 #1. Get simulation parameters: alpha, c0, l, init
 #Apply binary mask to init and loop:
-  #2. Simulation
-  #3. Find Steady State Density
+#2. Simulation
+#3. Find Steady State Density
 
 #1. Get simulation parameters
 simulationParam <- getCommunityParam(N)
@@ -97,14 +96,11 @@ model <- function(train_size){ #make model training reusable with a single set o
     predicted_SS[row,1] = predict(rf,data_point)
   }
   
-  #3. calculate accuracy
-  difference_score = colSums((predicted_SS - actual_sample$CommunityDensity)^2)/nrow(actual_sample)
-    #Another way of expressing accuracy: mean of prediction error%
+  #3. calculate accuracy: mean of %prediction error
   prediction_accuracy_mean = mean(abs(predicted_SS - actual_sample$CommunityDensity)/actual_sample$CommunityDensity)
   prediction_accuracy_sd = sd(abs(predicted_SS - actual_sample$CommunityDensity)/actual_sample$CommunityDensity)
   
-  re = list(difference_score=difference_score,
-            prediction_accuracy_mean=prediction_accuracy_mean,
+  re = list(prediction_accuracy_mean=prediction_accuracy_mean,
             prediction_accuracy_sd=prediction_accuracy_sd,
             actual_sample=actual_sample,
             predicted_SS=predicted_SS)
@@ -113,12 +109,9 @@ model <- function(train_size){ #make model training reusable with a single set o
 }
 
 
-#Create matrix to store training sample size and the result difference score and accuracy measure
-differenceScoreVsSampleSize = matrix(nrow = 18, ncol = 4)
-colnames(differenceScoreVsSampleSize) = c('difference_score',
-                                          'prediction_accuracy_mean',
-                                          'prediction_accuracy_sd',
-                                          'sample_size')
+#Create matrix to store training sample size and the result difference score
+predictionAccuracyVsSampleSize = matrix(nrow = 18, ncol = 3)
+colnames(predictionAccuracyVsSampleSize) = c('prediction_accuracy_mean','prediction_accuracy_sd','sample_size')
 
 par(mfrow = c(3,3))
 
@@ -126,36 +119,33 @@ row_counter = 0
 for (counter in c(c(1:9),seq(10,90,10))) {
   sample_size = counter *10
   returned = model(sample_size)
-  #Save all the returned matrices
-  difference_score = returned$difference_score
   prediction_accuracy_mean = returned$prediction_accuracy_mean
   prediction_accuracy_sd = returned$prediction_accuracy_sd
   actual_sample = returned$actual_sample
   predicted_SS = returned$predicted_SS
   
   row_counter = row_counter + 1
-  differenceScoreVsSampleSize[row_counter,1] = difference_score
-  differenceScoreVsSampleSize[row_counter,2] = prediction_accuracy_mean
-  differenceScoreVsSampleSize[row_counter,3] = prediction_accuracy_sd
-  differenceScoreVsSampleSize[row_counter,4] = sample_size
+  predictionAccuracyVsSampleSize[row_counter,1] = prediction_accuracy_mean
+  predictionAccuracyVsSampleSize[row_counter,2] = prediction_accuracy_sd
+  predictionAccuracyVsSampleSize[row_counter,3] = sample_size
   
-  plot(actual_sample$CommunityDensity,predicted_SS, main = paste(sample_size,'Samples Training:',round(difference_score,4)),
+  plot(actual_sample$CommunityDensity,predicted_SS, main = paste(sample_size,'Samples Training:',round(prediction_accuracy_mean,4)),
        xlab = 'Actual Community Density',ylab = 'Predicted Community Density')
 }
 
-#Plot our defined difference score as a function of training sample size
-plot(differenceScoreVsSampleSize[,4],differenceScoreVsSampleSize[,1], main = 'Difference Score of Predicted and Actual \nCommunity Density over Sample Size',
-     xlab = 'Training Sample Size', ylab = 'Difference Score of Predicted and Actual')
+#plot(differenceScoreVsSampleSize[,2],differenceScoreVsSampleSize[,1], main = 'Difference btw Predicted and Actual \nCommunity Density over Sample Size',
+#    xlab = 'Training Sample Size', ylab = 'Difference btw Predicted and Actual')
 
-
-#Plot our accuracy measure as a function of training sample size (scatter plot with error bar)
-differenceScoreVsSampleSize = as.data.frame(differenceScoreVsSampleSize)
-p <- ggplot(differenceScoreVsSampleSize, aes(x=sample_size, y=prediction_accuracy_mean)) + 
+#Scatter plot and error bar
+predictionAccuracyVsSampleSize = as.data.frame(predictionAccuracyVsSampleSize)
+p<- ggplot(predictionAccuracyVsSampleSize, aes(x=sample_size, y=prediction_accuracy_mean)) + 
   geom_line()+
   geom_point()+
-  geom_errorbar(aes(ymin=prediction_accuracy_mean-prediction_accuracy_sd, ymax=prediction_accuracy_mean+prediction_accuracy_sd))
+  geom_errorbar(aes(ymin=prediction_accuracy_mean-prediction_accuracy_sd, ymax=prediction_accuracy_mean+prediction_accuracy_sd), width=.2,
+                position=position_dodge(0.05))
+print(p)
 #title, labels etc.
-p+labs(title="RF Prediction Accuracy as % Difference btw Predicted and Actual", x="Training Sample Size", y = "Mean of Prediction Error%")+
-  scale_y_continuous(breaks=seq(-0.5,0.8,0.1))
+p+labs(title="Prediction Accuracy as % Difference btw Predicted and Actual", x="Training Sample Size", y = "Mean of Prediction Error%")
 
-#write.table(differenceScoreVsSampleSize, paste(getwd(),'/score102.csv', sep = ''), sep="\t")
+
+#write.table(differenceScoreVsSampleSize, paste(getwd(),'/lr4.csv', sep = ''), sep="\t")
