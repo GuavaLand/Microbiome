@@ -1,9 +1,9 @@
 getCommunityParam <- function(N){
   #Define species intrinsic growth rate
-  alpha <- runif(N,min = 0,max = 1)
+  alpha <- runif(N,min = 0,max = 0.5)
   
   #Define the constant in species-species interation coefficient
-  c0 <- matrix(runif(N*N, min = -1, max = 0.2),nrow = N)
+  c0 <- matrix(runif(N*N, min = -0.1, max = 0.1),nrow = N)
   #Set species self interation to -0.5
   for (i in 1:N) {
     for (j in 1:N) {
@@ -43,7 +43,7 @@ getCommunityParam <- function(N){
   }
   
   #Define initial abundance between 0.1 and 1, to 1 decimal place
-  init <- runif(N, min = 1, max = 10)/10
+  init <- runif(N, min = 0, max = 0.01)
   
   re = list(alpha = alpha, c0 = c0, l = l, init = init)
   return(re)
