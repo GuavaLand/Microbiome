@@ -1,6 +1,8 @@
 library(plyr)
 library(ggplot2)
-source('ML_GetCommunityParam.R')
+#Noise_GetCommunityParam to get param leading towards noisier steady state abundance
+#Can also use ML_GetCommunityParam to get param leading towards discretized steady state abundance
+source('Noise_GetCommunityParam.R')
 source('ML_CommunitySimulation.R')
 source('ML_FindSSDensity.R')
 source('ML_PredictionAccuracy.R')
@@ -82,7 +84,7 @@ model <- function(train_size){ #make model training reusable with a single set o
   #3. calculate prediction accuracy
   #4. save as a csv to cwd
   
-  test_sample_size = 50
+  test_sample_size = 150
   
   #1. take test sample
   actual_sample  = all_data[(train_size+1):(train_size + test_sample_size),]
